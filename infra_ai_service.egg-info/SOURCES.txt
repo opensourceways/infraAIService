@@ -1,0 +1,10 @@
+README.md
+setup.py
+infra_ai_service/__init__.py
+infra_ai_service/demo.py
+infra_ai_service.egg-info/PKG-INFO
+infra_ai_service.egg-info/SOURCES.txt
+infra_ai_service.egg-info/dependency_links.txt
+infra_ai_service.egg-info/top_level.txt
+tests/__init__.py
+tests/test_demo.py
