@@ -3,8 +3,6 @@
 Project includes:
 
 -   `fastapi`
--   `sqlmodel`
--   `alembic`
 
 ##
 
@@ -26,20 +24,6 @@ docker-compose logs -f --tail=100 web
 ```
 
 Go to: http://localhost:8000/api/docs/
-
-#### Migrations
-
-Create migrations
-
-```bash
-docker-compose exec web alembic revision --autogenerate -m "Example model"
-```
-
-Apply migrations
-
-```bash
-docker-compose exec web alembic upgrade head
-```
 
 #### Tests
 
@@ -67,22 +51,6 @@ python infra_ai_service/server.py
 ```
 
 Go to: http://localhost:8000/api/docs/
-
-#### Migrations
-
-Create migrations
-
-```bash
-cd infra_ai_service
-alembic revision --autogenerate -m "Example model"
-```
-
-Apply migrations
-
-```bash
-cd infra_ai_service
-alembic upgrade head
-```
 
 #### Tests
 
