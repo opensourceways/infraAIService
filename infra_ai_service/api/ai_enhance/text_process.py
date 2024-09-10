@@ -5,23 +5,22 @@ import re
 router = APIRouter()
 
 
-class TextRequest(BaseModel):
+class TextInput(BaseModel):
     content: str
 
 
-class TextResponse(BaseModel):
-    processed_content: str
+class TextOutput(BaseModel):
+    modified_content: str
 
 
 def clean_text(text: str) -> str:
-    cleaned_text = re.sub(r'[{}[\]()@.#\\_\':\/-]', '', text)
-    return cleaned_text
+    return re.sub(r'[{}[\]()@.#\\_\':\/-]', '', text)
 
 
-@router.post("/process_text/", response_model=TextResponse)
-async def process_text(request: TextRequest) -> TextResponse:
+@router.post("/process/", response_model=TextOutput)
+async def process_text(input_data: TextInput):
     try:
-        processed_text = clean_text(request.content)
-        return TextResponse(processed_content=processed_text)
+        modified_text = clean_text(input_data.content)
+        return TextOutput(modified_content=modified_text)
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error processing text: {str(e)}")
