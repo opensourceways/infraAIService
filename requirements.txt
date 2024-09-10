@@ -15,3 +15,5 @@ pytest-asyncio==0.19.0
 requests==2.31.0
 httpx==0.23.0
 pydantic==1.10.12
+fastembed==0.3.6
+qdrant-client==1.11.1
