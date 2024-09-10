@@ -20,5 +20,8 @@ def clean_text(text: str) -> str:
 
 @router.post("/process_text/", response_model=TextResponse)
 async def process_text(request: TextRequest) -> TextResponse:
-    processed_text = clean_text(request.content)
-    return TextResponse(processed_content=processed_text)
+    try:
+        processed_text = clean_text(request.content)
+        return TextResponse(processed_content=processed_text)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error processing text: {str(e)}")
