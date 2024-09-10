@@ -30,6 +30,7 @@ async def embed_text(input_data: TextInput):
         # 生成嵌入
         embeddings = list(fastembed_model.embed([input_data.content]))
         if not embeddings:
+            logger.error(f"Failed to generate embedding", exc_info=True)
             raise ValueError("Failed to generate embedding")
 
         embedding_vector = embeddings[0]
@@ -51,7 +52,7 @@ async def embed_text(input_data: TextInput):
 
         return EmbeddingOutput(id=point_id, embedding=embedding_vector.tolist())
     except Exception as e:
-        logger.error(f"Error in vector search: {str(e)}", exc_info=True)
+        logger.error(f"Error processing embedding: {str(e)}", exc_info=True)
         raise HTTPException(status_code=400,
                             detail=f"Error processing embedding: {str(e)}")
 
@@ -66,6 +67,6 @@ async def get_collection_status():
             "status": "ready" if collection_info.status == "green" else "not ready"
         }
     except Exception as e:
-        logger.error(f"Error in vector search: {str(e)}", exc_info=True)
+        logger.error(f"Error getting collection status: {str(e)}", exc_info=True)
         raise HTTPException(status_code=400,
                             detail=f"Error getting collection status: {str(e)}")

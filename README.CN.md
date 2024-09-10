@@ -1,6 +1,5 @@
 # 注意事项
 
-
 ## 前置条件
 - 需要安装本地psql数据库
 ```shell
@@ -11,6 +10,18 @@ sudo -u postgres psql
 ALTER USER postgres PASSWORD 'postgres';
 # 建立数据库（db）
 CREATE DATABASE db;
+```
+- 需要安装qdrant本地服务
+```shell
+# docker环境准备
+sudo apt update
+sudo apt install docker.io
+sudo systemctl start docker
+sudo systemctl enable docker
+# 安装
+sudo docker run -p 6333:6333 -d --name qdrant qdrant/qdrant
+# 测试
+curl http://localhost:6333
 ```
 
 ## 本地启动

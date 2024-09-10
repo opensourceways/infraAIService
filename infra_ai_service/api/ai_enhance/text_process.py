@@ -28,5 +28,5 @@ async def process_text(input_data: TextInput):
         modified_text = clean_text(input_data.content)
         return TextOutput(modified_content=modified_text)
     except Exception as e:
-        logger.error(f"Error in vector search: {str(e)}", exc_info=True)
+        logger.error(f"Error processing text: {str(e)}", exc_info=True)
         raise HTTPException(status_code=400, detail=f"Error processing text: {str(e)}")

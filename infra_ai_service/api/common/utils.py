@@ -1,7 +1,7 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import HTTPException
 from fastembed.embedding import DefaultEmbedding
 from qdrant_client import QdrantClient
-from qdrant_client.http.models import Distance, VectorParams, PointStruct
+from qdrant_client.http.models import Distance, VectorParams
 
 
 def setup_qdrant_environment():
