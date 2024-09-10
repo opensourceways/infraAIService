@@ -1,6 +1,11 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 import re
+import logging
+
+# 设置日志
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -23,4 +28,5 @@ async def process_text(input_data: TextInput):
         modified_text = clean_text(input_data.content)
         return TextOutput(modified_content=modified_text)
     except Exception as e:
+        logger.error(f"Error in vector search: {str(e)}", exc_info=True)
         raise HTTPException(status_code=400, detail=f"Error processing text: {str(e)}")
