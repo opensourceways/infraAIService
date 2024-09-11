@@ -19,7 +19,8 @@ class TextOutput(BaseModel):
 
 
 def clean_text(text: str) -> str:
-    return re.sub(r'[{}[\]()@.#\\_\':\/-]', '', text)
+    # 正确转义正则表达式中的特殊字符
+    return re.sub(r'[{}\[\]()@.#\\_\':\/-]', '', text)
 
 
 @router.post("/process/", response_model=TextOutput)
@@ -27,6 +28,9 @@ async def process_text(input_data: TextInput):
     try:
         modified_text = clean_text(input_data.content)
         return TextOutput(modified_content=modified_text)
+    except re.error as e:
+        logger.error(f"Regex error: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=400, detail="Regex processing error")
     except Exception as e:
         logger.error(f"Error processing text: {str(e)}", exc_info=True)
         raise HTTPException(status_code=400,
