@@ -27,20 +27,21 @@ async def create_embedding(content):
             ]
         )
 
-        return EmbeddingOutput(id=point_id, embedding=embedding_vector.tolist())
+        return EmbeddingOutput(id=point_id,
+                               embedding=embedding_vector.tolist())
     except Exception as e:
         raise HTTPException(status_code=400,
                             detail=f"Error processing embedding: {e}")
 
 
-async def get_collection_status(collection_name):
+async def get_collection_status():
     try:
         collection_info = qdrant_client.get_collection(collection_name)
         return {
             "collection_name": collection_name,
             "vectors_count": collection_info.vectors_count,
-            "status": "ready" if collection_info.status == "green" else "not "
-                                                                        "ready"
+            "status": "ready" if collection_info.status == "green"
+            else "not ready"
         }
     except Exception as e:
         raise HTTPException(status_code=400,

@@ -17,4 +17,4 @@ async def embed_text(input_data: TextInput):
 
 @router.get("/status/")
 async def status():
-    return await get_collection_status(collection_name)
+    return await get_collection_status()

@@ -1,7 +1,8 @@
 from fastapi import HTTPException
 import logging
 
-from infra_ai_service.model.model import SearchOutput, SearchResult, SearchInput
+from infra_ai_service.model.model import SearchOutput, SearchResult, \
+    SearchInput
 from infra_ai_service.sdk.qdrant import qdrant_client, collection_name, \
     fastembed_model
 
@@ -48,4 +49,5 @@ async def perform_vector_search(input_data: SearchInput):
         logger.error(f"Error performing vector search: {str(e)}",
                      exc_info=True)
         raise HTTPException(status_code=500,
-                            detail=f"Error performing vector search: {str(e)}")
+                            detail=f"Error performing vector search: "
+                                   f"{str(e)}")
