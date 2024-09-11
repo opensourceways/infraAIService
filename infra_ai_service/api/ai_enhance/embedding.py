@@ -50,9 +50,11 @@ async def embed_text(input_data: TextInput):
             ]
         )
 
-        return EmbeddingOutput(id=point_id, embedding=embedding_vector.tolist())
+        return EmbeddingOutput(id=point_id,
+                               embedding=embedding_vector.tolist())
     except Exception as e:
-        logger.error(f"Error processing embedding: {str(e)}", exc_info=True)
+        logger.error(f"Error processing embedding: {str(e)}",
+                     exc_info=True)
         raise HTTPException(status_code=400,
                             detail=f"Error processing embedding: {str(e)}")
 
@@ -64,9 +66,12 @@ async def get_collection_status():
         return {
             "collection_name": collection_name,
             "vectors_count": collection_info.vectors_count,
-            "status": "ready" if collection_info.status == "green" else "not ready"
+            "status": "ready" if collection_info.status == "green"
+            else "not ready"
         }
     except Exception as e:
-        logger.error(f"Error getting collection status: {str(e)}", exc_info=True)
+        logger.error(f"Error getting collection status: {str(e)}",
+                     exc_info=True)
         raise HTTPException(status_code=400,
-                            detail=f"Error getting collection status: {str(e)}")
+                            detail=f"Error getting collection status: "
+                                   f"{str(e)}")

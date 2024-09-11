@@ -20,7 +20,8 @@ class Settings(BaseSettings):
 
     @property
     def BASE_URL(self) -> str:
-        return self._BASE_URL if self._BASE_URL.endswith("/") else f"{self._BASE_URL}/"
+        return self._BASE_URL if self._BASE_URL.endswith(
+            "/") else f"{self._BASE_URL}/"
 
     class Config:
         env_file = f"{BASE_DIR}/.env"

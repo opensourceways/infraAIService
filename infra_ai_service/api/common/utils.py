@@ -22,7 +22,8 @@ def setup_qdrant_environment():
         # 创建集合
         qdrant_client.create_collection(
             collection_name=collection_name,
-            vectors_config=VectorParams(size=vector_size, distance=Distance.COSINE),
+            vectors_config=VectorParams(size=vector_size,
+                                        distance=Distance.COSINE),
         )
         print(f"Created collection: {collection_name}")
     return fastembed_model, qdrant_client, collection_name

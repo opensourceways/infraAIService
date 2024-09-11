@@ -1,3 +1,4 @@
+#!/bin/bash
 curl -X 'POST' \
   'http://localhost:8000/api/search/query/' \
   -H 'accept: application/json' \

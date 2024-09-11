@@ -51,4 +51,3 @@ def read_item(item_id: int):
     if item_id not in [1, 2, 3]:
         raise HTTPException(status_code=404, detail="Item not found")
     return {"name": [1, 2, 3][item_id]}
-
