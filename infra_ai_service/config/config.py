@@ -3,7 +3,7 @@ from sys import modules
 
 from pydantic import BaseSettings
 
-BASE_DIR = Path(__file__).parent.resolve()
+BASE_DIR = Path(__file__).parent.parent.parent.resolve()
 
 
 class Settings(BaseSettings):
