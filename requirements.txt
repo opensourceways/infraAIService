@@ -17,4 +17,5 @@ pydantic==1.10.12
 fastembed==0.3.6
 setuptools~=74.1.2
 psycopg~=3.2.1
-pgvector~=0.3.3
+pgvector~=0.3.3openai==1.43.1
+python-multipart
