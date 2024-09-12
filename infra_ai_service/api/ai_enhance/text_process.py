@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
-from infra_ai_service.model.model import TextInput, TextOutput
-from infra_ai_service.service.text_service import process_text
+from model.model import TextInput, TextOutput
+from service.text_service import process_text
 
 router = APIRouter()
 

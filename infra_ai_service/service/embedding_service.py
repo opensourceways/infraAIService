@@ -1,8 +1,8 @@
 from fastapi import HTTPException
 import uuid
 
-from infra_ai_service.model.model import PointStruct, EmbeddingOutput
-from infra_ai_service.sdk.qdrant import fastembed_model, qdrant_client, \
+from model.model import PointStruct, EmbeddingOutput
+from sdk.qdrant import fastembed_model, qdrant_client, \
     collection_name
 
 

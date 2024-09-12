@@ -2,7 +2,7 @@ import re
 from fastapi import HTTPException
 import logging
 
-from infra_ai_service.model.model import TextOutput
+from model.model import TextOutput
 
 logger = logging.getLogger(__name__)
 

@@ -1,5 +1,5 @@
 import uvicorn
-from infra_ai_service.config.config import settings
+from config.config import settings
 
 
 def main() -> None:

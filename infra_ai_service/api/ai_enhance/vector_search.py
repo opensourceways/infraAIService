@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
-from infra_ai_service.model.model import SearchOutput, SearchInput
-from infra_ai_service.service.search_service import perform_vector_search
+from model.model import SearchOutput, SearchInput
+from service.search_service import perform_vector_search
 
 router = APIRouter()
 

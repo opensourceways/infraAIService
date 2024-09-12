@@ -1,9 +1,9 @@
 from fastapi import HTTPException
 import logging
 
-from infra_ai_service.model.model import SearchOutput, SearchResult, \
+from model.model import SearchOutput, SearchResult, \
     SearchInput
-from infra_ai_service.sdk.qdrant import qdrant_client, collection_name, \
+from sdk.qdrant import qdrant_client, collection_name, \
     fastembed_model
 
 logger = logging.getLogger(__name__)
