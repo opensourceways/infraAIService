@@ -26,5 +26,21 @@ python infra_ai_service/server.py
 ```
 
 
+## 访问spec-repair API
+
+服务启动后可使用如下命令访问服务
+```shell
+curl -X POST http://localhost:8000/api/v1/spec-repair/ -F err_spec_file=@/path/repair.spec -F err_log_file=@/path/error.log
+```
+响应格式:
+```python
+{  
+    'suggestions': 'suggestions(str)',  
+    'repair_status': 'is_repaired(bool)',  
+    'repair_spec': 'repaired_spec_lines(str)',  
+    'log': 'log_content(str)'  
+}
+```
+
 ## 本地访问
 - 浏览器打开 http://localhost:8000/ 显示 {"Hello":"World"}
