@@ -1,18 +1,8 @@
 # 注意事项
 
 ## 前置条件
-- 需要安装qdrant本地服务
-```shell
-# docker环境准备
-sudo apt update
-sudo apt install docker.io
-sudo systemctl start docker
-sudo systemctl enable docker
-# 安装
-sudo docker run -p 6333:6333 -d --name qdrant qdrant/qdrant
-# 测试
-curl http://localhost:6333
-```
+- 需要安装数据库postgresql及其pgvector插件
+- 需要新增.env文件，将数据库配置，外部服务配置等添加，并将MODEL_NAME设置为multi-qa-MiniLM-L6-cos-v1
 
 ## 本地启动
 ```shell
@@ -25,6 +15,14 @@ pytest .
 python infra_ai_service/server.py
 ```
 
+# 容器化部署
+```shell
+# 构建容器
+docker build -t infra_ai_service .
+# 运行ai_service服务
+docker run -p 8001:8000 -d --name infra_ai_service_imp ai_service
+
+```
 
 ## 访问spec-repair API
 
