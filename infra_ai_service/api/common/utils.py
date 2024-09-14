@@ -9,12 +9,14 @@ def setup_qdrant_environment():
     fastembed_model = DefaultEmbedding()
     qdrant_client = QdrantClient(url="http://localhost:6333")
     collection_name = 'test_simi'
-
     # 检查集合是否存在，如果不存在则创建
-    try:
-        qdrant_client.get_collection(collection_name)
-        print(f"Collection {collection_name} already exists")
-    except HTTPException as e:
+    collections_list = qdrant_client.get_collections()
+    exist_flag = False
+    for collection in collections_list.collections:
+        if collection.name == collection_name:
+            exist_flag = True
+            break
+    if not exist_flag:
         # 获取向量维度
         sample_embedding = next(fastembed_model.embed(["Sample text"]))
         vector_size = len(sample_embedding)
@@ -26,4 +28,6 @@ def setup_qdrant_environment():
                                         distance=Distance.COSINE),
         )
         print(f"Created collection: {collection_name}")
+    else:
+        print(f"Collection {collection_name} already exists")
     return fastembed_model, qdrant_client, collection_name
