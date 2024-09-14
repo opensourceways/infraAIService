@@ -1,4 +1,5 @@
 import uvicorn
+
 from infra_ai_service.config.config import settings
 
 
