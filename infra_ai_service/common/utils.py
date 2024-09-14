@@ -7,7 +7,6 @@ from psycopg import AsyncConnection
 from pgvector.psycopg import register_vector_async
 
 
-
 def setup_qdrant_environment():
     # 初始化FastEmbed模型和Qdrant客户端
     fastembed_model = DefaultEmbedding()
@@ -31,6 +30,7 @@ def setup_qdrant_environment():
         )
         print(f"Created collection: {collection_name}")
     return fastembed_model, qdrant_client, collection_name
+
 
 async def setup_pgvector_environment():
     # 初始化 SentenceTransformer 模型
