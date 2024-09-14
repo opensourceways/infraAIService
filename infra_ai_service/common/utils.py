@@ -2,9 +2,6 @@ from fastapi import HTTPException
 from fastembed.embedding import DefaultEmbedding
 from qdrant_client import QdrantClient
 from qdrant_client.http.models import Distance, VectorParams
-from sentence_transformers import SentenceTransformer
-from psycopg import AsyncConnection
-from pgvector.psycopg import register_vector_async
 
 
 def setup_qdrant_environment():
@@ -32,33 +29,17 @@ def setup_qdrant_environment():
     return fastembed_model, qdrant_client, collection_name
 
 
-async def setup_pgvector_environment():
-    # 初始化 SentenceTransformer 模型
-    model = SentenceTransformer('multi-qa-MiniLM-L6-cos-v1')
-
-    # 连接到 PostgreSQL 数据库
-    conn = await AsyncConnection.connect(
-        dbname='your_database_name',
-        user='your_user',
-        password='your_password',
-        host='your_host',
-        port='your_port',
-        autocommit=True
-    )
-
-    # 注册 pgvector 并创建必要的表和索引
-    await conn.execute('CREATE EXTENSION IF NOT EXISTS vector')
-    await register_vector_async(conn)
-    await conn.execute('''
-        CREATE TABLE IF NOT EXISTS documents (
-            id bigserial PRIMARY KEY,
-            content text,
-            embedding vector(384)
-        )
-    ''')
-    await conn.execute('''
-        CREATE INDEX IF NOT EXISTS documents_content_idx
-        ON documents USING GIN (to_tsvector('english', content))
-    ''')
-
-    return model, conn
+async def setup_database(pool):
+    async with pool.connection() as conn:
+        await conn.execute('CREATE EXTENSION IF NOT EXISTS vector')
+        await conn.execute('''
+            CREATE TABLE IF NOT EXISTS documents (
+                id bigserial PRIMARY KEY,
+                content text,
+                embedding vector(384)
+            )
+        ''')
+        await conn.execute('''
+            CREATE INDEX IF NOT EXISTS documents_content_idx
+            ON documents USING GIN (to_tsvector('english', content))
+        ''')

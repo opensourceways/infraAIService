@@ -2,7 +2,7 @@ import uuid
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 from fastapi import HTTPException
-from infra_ai_service.sdk.pgvector import model, conn
+from infra_ai_service.sdk.pgvector import model, pool
 from infra_ai_service.model.model import PointStruct, EmbeddingOutput
 from infra_ai_service.sdk.qdrant import fastembed_model, qdrant_client, \
     collection_name
@@ -38,21 +38,27 @@ async def create_embedding(content):
 
 async def create_embedding_v2(content):
     try:
+        # 确保模型已初始化
+        if model is None:
+            raise HTTPException(status_code=500, detail="Model is not "
+                                                        "initialized")
+
         # 使用线程池执行同步的嵌入计算
         loop = asyncio.get_running_loop()
-        with ThreadPoolExecutor() as pool:
+        with ThreadPoolExecutor() as pool_executor:
             embedding_vector = await loop.run_in_executor(
-                pool, model.encode, [content]
+                pool_executor, model.encode, [content]
             )
             embedding_vector = embedding_vector[0]
 
-        # 将嵌入向量插入数据库
-        async with conn.cursor() as cur:
-            await cur.execute(
-                'INSERT INTO documents (content, embedding) VALUES (%s, %s) RETURNING id',
-                (content, embedding_vector)
-            )
-            point_id = (await cur.fetchone())[0]
+        # 从连接池获取连接
+        async with pool.connection() as conn:
+            async with conn.cursor() as cur:
+                await cur.execute(
+                    'INSERT INTO documents (content, embedding) VALUES (%s, %s) RETURNING id',
+                    (content, embedding_vector)
+                )
+                point_id = (await cur.fetchone())[0]
 
         return EmbeddingOutput(id=point_id, embedding=embedding_vector.tolist())
     except Exception as e:
