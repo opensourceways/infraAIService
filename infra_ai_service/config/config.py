@@ -1,10 +1,9 @@
 # infra_ai_service/config/config.py
-
 from pathlib import Path
 
 from pydantic import BaseSettings
 
-BASE_DIR = Path(__file__).parent.parent.parent.resolve()
+BASE_DIR = Path.cwd()
 
 
 class Settings(BaseSettings):
