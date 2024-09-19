@@ -1,11 +1,11 @@
 from fastapi import APIRouter
 
 from infra_ai_service.api.ai_enhance.text_process import TextInput
-from infra_ai_service.api.common.utils import setup_qdrant_environment
-
 from infra_ai_service.model.model import EmbeddingOutput
-from infra_ai_service.service.embedding_service import create_embedding, \
-    get_collection_status
+from infra_ai_service.service.embedding_service import (
+    create_embedding,
+    get_collection_status,
+)
 
 router = APIRouter()
 

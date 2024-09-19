@@ -1,6 +1,7 @@
-from infra_ai_service.api.router import api_router
 from fastapi import FastAPI
 from fastapi.responses import UJSONResponse
+
+from infra_ai_service.api.router import api_router
 
 
 def get_app() -> FastAPI:

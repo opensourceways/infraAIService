@@ -1,4 +1,3 @@
-from fastapi import HTTPException
 from fastembed.embedding import DefaultEmbedding
 from qdrant_client import QdrantClient
 from qdrant_client.http.models import Distance, VectorParams
@@ -8,7 +7,7 @@ def setup_qdrant_environment():
     # 初始化FastEmbed模型和Qdrant客户端
     fastembed_model = DefaultEmbedding()
     qdrant_client = QdrantClient(path="./qdrant_storage")
-    collection_name = 'simi'
+    collection_name = "simi"
     # 检查集合是否存在，如果不存在则创建
     collections_list = qdrant_client.get_collections()
     exist_flag = False
@@ -24,8 +23,7 @@ def setup_qdrant_environment():
         # 创建集合
         qdrant_client.create_collection(
             collection_name=collection_name,
-            vectors_config=VectorParams(size=vector_size,
-                                        distance=Distance.COSINE),
+            vectors_config=VectorParams(size=vector_size, distance=Distance.COSINE),
         )
         print(f"Created collection: {collection_name}")
     else:
