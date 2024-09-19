@@ -29,12 +29,8 @@ python infra_ai_service/server.py
 ```shell
 # 构建容器
 docker build -t ai_service .
-# 建立容器间网络
-docker network create ai_network
-# 运行qdrant服务
-docker run -p 6333:6333 -d --network ai_network --name ai_service_qdrant_imp qdrant/qdrant
 # 运行ai_service服务
-docker run -p 8001:8000 -d --network ai_network --name ai_service_imp ai_service
+docker run -p 8001:8000 -d --name ai_service_imp ai_service
 
 ```
 
