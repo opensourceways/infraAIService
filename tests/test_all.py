@@ -1,5 +1,4 @@
 # tests/test_all.py
-
 from infra_ai_service.api.common.utils import setup_qdrant_environment
 
 

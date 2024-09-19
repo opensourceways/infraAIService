@@ -30,3 +30,4 @@ infra_ai_service/service/embedding_service.py
 infra_ai_service/service/search_service.py
 infra_ai_service/service/text_service.py
 tests/test_all.py
+tests/test_api.py
