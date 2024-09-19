@@ -13,3 +13,5 @@ api_router.include_router(embedding_router, prefix="/embedding",
                           tags=["embedding"])
 api_router.include_router(vector_search_router, prefix="/search",
                           tags=["search"])
+api_router.include_router(embedding_router, prefix="/status",
+                          tags=["status"])
