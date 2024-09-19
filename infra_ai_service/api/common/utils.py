@@ -7,8 +7,8 @@ from qdrant_client.http.models import Distance, VectorParams
 def setup_qdrant_environment():
     # 初始化FastEmbed模型和Qdrant客户端
     fastembed_model = DefaultEmbedding()
-    qdrant_client = QdrantClient(url="http://ai_service_qdrant_imp:6333")
-    collection_name = 'test_simi'
+    qdrant_client = QdrantClient(path="./qdrant_storage")
+    collection_name = 'simi'
     # 检查集合是否存在，如果不存在则创建
     collections_list = qdrant_client.get_collections()
     exist_flag = False
