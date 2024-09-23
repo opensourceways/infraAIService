@@ -2,80 +2,38 @@ import uuid
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 from fastapi import HTTPException
-from infra_ai_service.sdk.pgvector import model, pool
-from infra_ai_service.model.model import PointStruct, EmbeddingOutput
-from infra_ai_service.sdk.qdrant import fastembed_model, qdrant_client, \
-    collection_name
+from infra_ai_service.sdk import pgvector
+from infra_ai_service.model.model import EmbeddingOutput
 
 
 async def create_embedding(content):
     try:
-        embeddings = list(fastembed_model.embed([content]))
-        if not embeddings:
-            raise HTTPException(status_code=500,
-                                detail="Failed to generate embedding")
-
-        embedding_vector = embeddings[0]
-        point_id = str(uuid.uuid4())
-
-        qdrant_client.upsert(
-            collection_name=collection_name,
-            points=[
-                PointStruct(
-                    id=point_id,
-                    vector=embedding_vector.tolist(),
-                    payload={"text": content}
-                )
-            ]
-        )
-
-        return EmbeddingOutput(id=point_id,
-                               embedding=embedding_vector.tolist())
-    except Exception as e:
-        raise HTTPException(status_code=400,
-                            detail=f"Error processing embedding: {e}")
-
-
-async def create_embedding_v2(content):
-    try:
         # 确保模型已初始化
-        if model is None:
-            raise HTTPException(status_code=500, detail="Model is not "
-                                                        "initialized")
+        if pgvector.model is None:
+            raise HTTPException(status_code=500,
+                                detail="Model is not initialized")
 
         # 使用线程池执行同步的嵌入计算
         loop = asyncio.get_running_loop()
         with ThreadPoolExecutor() as pool_executor:
             embedding_vector = await loop.run_in_executor(
-                pool_executor, model.encode, [content]
+                pool_executor, pgvector.model.encode, [content]
             )
             embedding_vector = embedding_vector[0]
 
+        # 将 ndarray 转换为列表
+        embedding_vector_list = embedding_vector.tolist()
+
         # 从连接池获取连接
-        async with pool.connection() as conn:
+        async with pgvector.pool.connection() as conn:
             async with conn.cursor() as cur:
                 await cur.execute(
                     'INSERT INTO documents (content, embedding) VALUES (%s, %s) RETURNING id',
-                    (content, embedding_vector)
+                    (content, embedding_vector_list)  # 使用转换后的列表
                 )
                 point_id = (await cur.fetchone())[0]
 
-        return EmbeddingOutput(id=point_id, embedding=embedding_vector.tolist())
+        return EmbeddingOutput(id=point_id, embedding=embedding_vector_list)
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Error processing "
-                                                    f"embedding: {e}")
-
-
-async def get_collection_status():
-    try:
-        async with conn.cursor() as cur:
-            await cur.execute('SELECT COUNT(*) FROM documents')
-            vectors_count = (await cur.fetchone())[0]
-        return {
-            "collection_name": 'documents',
-            "vectors_count": vectors_count,
-            "status": "ready"
-        }
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Error getting "
-                                                    f"collection status: {e}")
+        raise HTTPException(status_code=400,
+                            detail=f"Error processing embedding: {e}")
