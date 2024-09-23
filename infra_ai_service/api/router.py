@@ -1,9 +1,9 @@
 from fastapi.routing import APIRouter
 
-from infra_ai_service.api.ai_enhance.text_process import \
-    router as text_process_router
 from infra_ai_service.api.ai_enhance.embedding import \
     router as embedding_router
+from infra_ai_service.api.ai_enhance.text_process import \
+    router as text_process_router
 from infra_ai_service.api.ai_enhance.vector_search import \
     router as vector_search_router
 
