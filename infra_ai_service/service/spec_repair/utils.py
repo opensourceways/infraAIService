@@ -1,7 +1,7 @@
-import re
-import inspect
 import difflib
-from typing import Dict, Annotated, get_origin, get_args
+import inspect
+import re
+from typing import Annotated, Dict, get_args, get_origin
 
 TYPE_MAPPING = {
     "str": "string",
@@ -75,7 +75,9 @@ def repair_spec(
     fault_segment: Annotated[
         str, "spec脚本中导致错误的代码片段，附带行号，按行号从小到大顺序"
     ] = "",
-    repaired_segment: Annotated[str, "对应修复后的spec脚本代码片段，附带行号"] = "",
+    repaired_segment: Annotated[
+        str, "对应修复后的spec脚本代码片段，附带行号"
+    ] = "",
 ) -> str:
     """根据报错信息修复spec脚本"""
 
@@ -86,92 +88,128 @@ def repair_spec_pro(
     fault_segment: Annotated[
         str, "spec脚本中导致错误的代码片段，附带行号，按行号从小到大顺序"
     ] = "",
-    repaired_segment: Annotated[str, "对应修复后的spec脚本代码片段，附带行号"] = "",
+    repaired_segment: Annotated[
+        str, "对应修复后的spec脚本代码片段，附带行号"
+    ] = "",
 ) -> str:
     """根据报错信息修复spec脚本"""
 
     return "spec 脚本修复"
 
 
-def repair_spec_impl(spec_lines: list,
-                     fault_segment: str,
-                     repaired_segment: str):
+def extract_delete_list(fault_lines):
+    # 错误片段提取
+    pattern = r"^\d+: .+$"
+    delete_list = []
+    start_index = -1
+    current_index = -1
+    for line in fault_lines:
+        start_index, current_index = process_delete_line(
+            line, pattern, start_index, current_index, delete_list
+        )
+    if start_index != -1:
+        delete_list.append((start_index, current_index + 1))
+    return delete_list
 
+
+def process_delete_line(
+    line, pattern, start_index, current_index, delete_list
+):
+    if re.match(pattern, line):
+        index = int(line.split(": ")[0])
+        if start_index == -1:
+            start_index = index
+            current_index = index
+        elif index - current_index == 1:
+            current_index = index
+        else:
+            delete_list.append((start_index, current_index + 1))
+            start_index = index
+            current_index = index
+    else:
+        if start_index != -1:
+            delete_list.append((start_index, current_index + 1))
+            start_index = -1
+            current_index = -1
+    return start_index, current_index
+
+
+def extract_insert_list(repaired_lines):
+    # 修复片段提取
+    pattern = r"^\d+: .+$"
+    insert_list = []
+    insert_line_list = []
+    start_index = -1
+    current_index = -1
+    line_list = []
+    for line in repaired_lines:
+        start_index, current_index, line_list = process_insert_line(
+            line,
+            pattern,
+            start_index,
+            current_index,
+            line_list,
+            insert_list,
+            insert_line_list,
+        )
+    if start_index != -1:
+        insert_list.append((start_index, current_index + 1))
+        insert_line_list.append(line_list)
+    return insert_list, insert_line_list
+
+
+def process_insert_line(
+    line,
+    pattern,
+    start_index,
+    current_index,
+    line_list,
+    insert_list,
+    insert_line_list,
+):
+    if re.match(pattern, line):
+        index, line_content = line.split(": ", 1)
+        index = int(index)
+        if start_index == -1:
+            start_index = index
+            current_index = index
+            line_list = [line_content]
+        elif index - current_index == 1:
+            current_index = index
+            line_list.append(line_content)
+        else:
+            insert_list.append((start_index, current_index + 1))
+            insert_line_list.append(line_list)
+            start_index = index
+            current_index = index
+            line_list = [line_content]
+    else:
+        if start_index != -1:
+            insert_list.append((start_index, current_index + 1))
+            insert_line_list.append(line_list)
+            start_index = -1
+            current_index = -1
+            line_list = []
+    return start_index, current_index, line_list
+
+
+def repair_spec_impl(
+    spec_lines: list, fault_segment: str, repaired_segment: str
+):
     fault_lines = fault_segment.split("\n")
     fault_lines = [line + "\n" for line in fault_lines]
     repaired_lines = repaired_segment.split("\n")
     repaired_lines = [line + "\n" for line in repaired_lines]
 
-    # 匹配模式：
-    # 25: %build
-    # 26: export LANG=C.UTF-8
-    pattern = r"^\d+: .+$"
-
-    # 错误片段提取
-    delete_list = []
-    start_index = -1
-    current_index = -1
-    for i in range(len(fault_lines)):
-        line = fault_lines[i]
-        if re.match(pattern, line):
-            index = int(line.split(": ")[0])
-            if start_index == -1:
-                start_index = index
-                current_index = index
-            elif index - current_index == 1:
-                current_index = index
-            else:
-                delete_list.append((start_index, current_index + 1))
-                start_index = index
-                current_index = index
-        else:
-            if start_index != -1:
-                delete_list.append((start_index, current_index + 1))
-                start_index = -1
-                current_index = -1
-    if start_index != -1:
-        delete_list.append((start_index, current_index + 1))
-
+    # 提取删除列表
+    delete_list = extract_delete_list(fault_lines)
     if len(delete_list) == 0:
         return False, None
 
-    # 修复片段提取
-    insert_list = []
-    start_index = -1
-    current_index = -1
-    insert_line_list = []
-    line_list = []
-    for i in range(len(repaired_lines)):
-        line = repaired_lines[i]
-        if re.match(pattern, line):
-            index, line = line.split(": ", 1)
-            index = int(index)
-            if start_index == -1:
-                start_index = index
-                current_index = index
-                line_list = [line]
-            elif index - current_index == 1:
-                current_index = index
-                line_list.append(line)
-            else:
-                insert_list.append((start_index, current_index + 1))
-                start_index = index
-                current_index = index
-                insert_line_list.append(line_list)
-                line_list = [line]
-        else:
-            if start_index != -1:
-                insert_list.append((start_index, current_index + 1))
-                start_index = -1
-                current_index = -1
-                insert_line_list.append(line_list)
-                line_list = []
+    # 提取插入列表
+    insert_list, insert_line_list = extract_insert_list(repaired_lines)
 
-    if start_index != -1:
-        insert_list.append((start_index, current_index + 1))
-        insert_line_list.append(line_list)
-
-    # 按行号有大到小排序
+    # 按行号由大到小排序
     delete_list_with_index = [(i, tup) for i, tup in enumerate(delete_list)]
     sorted_delete_list_with_index = sorted(
         delete_list_with_index, key=lambda x: x[1][0], reverse=True
@@ -193,27 +231,27 @@ def repair_spec_impl(spec_lines: list,
 def get_patch(source_lines, target_lines):
     # 生成patch
     diff = difflib.unified_diff(
-        source_lines, target_lines, fromfile='ERROR.spec', tofile='REPAIR.spec'
+        source_lines, target_lines, fromfile="ERROR.spec", tofile="REPAIR.spec"
     )
-    return ''.join(diff)
+    return "".join(diff)
 
 
 def save_log(is_repaired, error_info, suggestion, fault_segment, patch):
-    repair_status = 'Repaired' if is_repaired else 'Not Repaired'
+    repair_status = "Repaired" if is_repaired else "Not Repaired"
 
-    log = '====================[Execution Log]====================\n\n'
-    log += f'Repair Status: [{repair_status}]\n\n'
+    log = "====================[Execution Log]====================\n\n"
+    log += f"Repair Status: [{repair_status}]\n\n"
 
-    log += '====================[Error Message]====================\n\n'
-    log += f'{error_info}\n\n'
+    log += "====================[Error Message]====================\n\n"
+    log += f"{error_info}\n\n"
 
-    log += '--------------------[AI Suggestion]--------------------\n\n'
-    log += f'{suggestion}\n\n'
+    log += "--------------------[AI Suggestion]--------------------\n\n"
+    log += f"{suggestion}\n\n"
 
-    log += '--------------------[Fault Code]--------------------\n\n'
-    log += f'{fault_segment}\n\n'
+    log += "--------------------[Fault Code]--------------------\n\n"
+    log += f"{fault_segment}\n\n"
 
-    log += '--------------------[Patch Code]--------------------\n\n'
-    log += f'{patch}\n\n'
+    log += "--------------------[Patch Code]--------------------\n\n"
+    log += f"{patch}\n\n"
 
     return log
