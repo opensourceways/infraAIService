@@ -23,7 +23,7 @@ def get_app() -> FastAPI:
         default_response_class=UJSONResponse,
     )
 
-    app.include_router(router=api_router, prefix="/api")
+    app.include_router(router=api_router, prefix="/api/v1")
 
     @app.on_event("startup")
     async def startup_event():
