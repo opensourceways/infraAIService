@@ -1,7 +1,6 @@
 from fastapi import APIRouter
 
-from infra_ai_service.api.ai_enhance.text_process import TextInput
-from infra_ai_service.model.model import EmbeddingOutput
+from infra_ai_service.model.model import EmbeddingOutput, TextInput
 from infra_ai_service.service.embedding_service import create_embedding
 
 router = APIRouter()
