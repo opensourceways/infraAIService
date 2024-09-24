@@ -23,5 +23,6 @@ async def process_text(input_content: str) -> TextOutput:
         return TextOutput(modified_content=modified_text)
     except Exception as e:
         logger.error(f"Error processing text: {str(e)}", exc_info=True)
-        raise HTTPException(status_code=400,
-                            detail=f"Error processing text: {str(e)}")
+        raise HTTPException(
+            status_code=400, detail=f"Error processing text: {str(e)}"
+        )

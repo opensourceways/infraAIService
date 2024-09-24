@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     """Application settings."""
 
     ENV: str = "dev"
-    HOST: str = 'localhost'
+    HOST: str = "localhost"
     PORT: int = 8000
     _BASE_URL: str = f"http://{HOST}:{PORT}"
     WORKERS_COUNT: int = 1
@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     DB_PORT: int = 0
 
     # 模型名称配置项
-    MODEL_NAME: str = ""
+    MODEL_NAME: str = "model-name-here"
 
     # 新增的配置项
     VECTOR_EXTENSION: str = ""
@@ -34,10 +34,10 @@ class Settings(BaseSettings):
     LANGUAGE: str = ""
 
     # SpecBot config
-    SPECBOT_AI_MODEL: str = ''
-    REPAIR_PRO_AI_MODEL: str = ''
-    OPENAI_API_KEY: str = ''
-    OPENAI_BASE_URL: str = ''
+    SPECBOT_AI_MODEL: str = ""
+    REPAIR_PRO_AI_MODEL: str = ""
+    OPENAI_API_KEY: str = ""
+    OPENAI_BASE_URL: str = ""
 
     @property
     def BASE_URL(self) -> str:
@@ -61,24 +61,16 @@ class Settings(BaseSettings):
             "TABLE_NAME": {"env": "TABLE_NAME"},
             "VECTOR_DIMENSION": {"env": "VECTOR_DIMENSION"},
             "LANGUAGE": {"env": "LANGUAGE"},
-            'HOST': {
-                'env': 'HOST',
+            "HOST": {
+                "env": "HOST",
             },
-            'PORT': {
-                'env': 'PORT',
+            "PORT": {
+                "env": "PORT",
             },
-            'SPECBOT_AI_MODEL': {
-                'env': 'SPECBOT_AI_MODEL'
-            },
-            'REPAIR_PRO_AI_MODEL': {
-                'env': 'REPAIR_PRO_AI_MODEL'
-            },
-            'OPENAI_API_KEY': {
-                'env': 'OPENAI_API_KEY'
-            },
-            'OPENAI_BASE_URL': {
-                'env': 'OPENAI_BASE_URL'
-            }
+            "SPECBOT_AI_MODEL": {"env": "SPECBOT_AI_MODEL"},
+            "REPAIR_PRO_AI_MODEL": {"env": "REPAIR_PRO_AI_MODEL"},
+            "OPENAI_API_KEY": {"env": "OPENAI_API_KEY"},
+            "OPENAI_BASE_URL": {"env": "OPENAI_BASE_URL"},
         }
 
 

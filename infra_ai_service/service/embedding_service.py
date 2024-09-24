@@ -1,7 +1,7 @@
 import asyncio
-import uuid
 from concurrent.futures import ThreadPoolExecutor
 
+import numpy
 from fastapi import HTTPException
 
 from infra_ai_service.model.model import EmbeddingOutput
@@ -12,8 +12,9 @@ async def create_embedding(content):
     try:
         # 确保模型已初始化
         if pgvector.model is None:
-            raise HTTPException(status_code=500,
-                                detail="Model is not initialized")
+            raise HTTPException(
+                status_code=500, detail="Model is not initialized"
+            )
 
         # 使用线程池执行同步的嵌入计算
         loop = asyncio.get_running_loop()
@@ -23,8 +24,11 @@ async def create_embedding(content):
             )
             embedding_vector = embedding_vector[0]
 
-        # 将 ndarray 转换为列表
-        embedding_vector_list = embedding_vector.tolist()
+        # 检查返回类型是否为 ndarray，如果是，则转换为列表
+        if isinstance(embedding_vector, numpy.ndarray):
+            embedding_vector_list = embedding_vector.tolist()
+        else:
+            embedding_vector_list = embedding_vector  # 假设已经是列表
 
         # 从连接池获取连接
         async with pgvector.pool.connection() as conn:
@@ -36,7 +40,10 @@ async def create_embedding(content):
                 )
                 point_id = (await cur.fetchone())[0]
 
-        return EmbeddingOutput(id=point_id, embedding=embedding_vector_list)
+        return EmbeddingOutput(
+            id=str(point_id), embedding=embedding_vector_list
+        )
     except Exception as e:
-        raise HTTPException(status_code=400,
-                            detail=f"Error processing embedding: {e}")
+        raise HTTPException(
+            status_code=400, detail=f"Error processing embedding: {e}"
+        )

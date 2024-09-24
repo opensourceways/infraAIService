@@ -4,16 +4,20 @@ import asyncio
 import logging
 from concurrent.futures import ThreadPoolExecutor
 
+import numpy
 from fastapi import HTTPException
 
-from infra_ai_service.model.model import SearchInput, SearchOutput, \
-    SearchResult
+from infra_ai_service.model.model import (
+    SearchInput,
+    SearchOutput,
+    SearchResult,
+)
 from infra_ai_service.sdk import pgvector
 
 logger = logging.getLogger(__name__)
 
 
-async def perform_vector_search(input_data: SearchInput):
+async def prepare_vector(input_data: SearchInput):
     try:
         # 确保模型已初始化
         if pgvector.model is None:
@@ -28,9 +32,24 @@ async def perform_vector_search(input_data: SearchInput):
             )
             embedding_vector = embedding_vector[0]
 
-        # 将 ndarray 转换为列表
-        embedding_vector_list = embedding_vector.tolist()
+        # 检查返回类型是否为 ndarray，如果是，则转换为列表
+        if isinstance(embedding_vector, numpy.ndarray):
+            embedding_vector_list = embedding_vector.tolist()
+        else:
+            embedding_vector_list = embedding_vector  # 假设已经是列表
 
+        return embedding_vector_list
+    except Exception as e:
+        logger.error(f"准备向量时出错: {str(e)}", exc_info=True)
+        raise HTTPException(
+            status_code=500, detail=f"准备向量时出错: {str(e)}"
+        )
+
+
+async def perform_vector_search(input_data: SearchInput):
+    embedding_vector_list = await prepare_vector(input_data)
+
+    try:
         # 从连接池获取连接
         async with pgvector.pool.connection() as conn:
             async with conn.cursor() as cur:
@@ -54,12 +73,14 @@ async def perform_vector_search(input_data: SearchInput):
             similarity = row[3]  # 相似度得分
             if similarity >= input_data.score_threshold:
                 results.append(
-                    SearchResult(id=str(row[0]), score=similarity,
-                                 text=row[1])  # 内容
+                    SearchResult(
+                        id=str(row[0]), score=similarity, text=row[1]
+                    )  # 内容
                 )
 
         return SearchOutput(results=results)
     except Exception as e:
         logger.error(f"执行向量搜索时出错: {str(e)}", exc_info=True)
-        raise HTTPException(status_code=500,
-                            detail=f"执行向量搜索时出错: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"执行向量搜索时出错: {str(e)}"
+        )
