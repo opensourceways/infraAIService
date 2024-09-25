@@ -8,4 +8,6 @@ router = APIRouter()
 
 @router.post("/embed/", response_model=EmbeddingOutput)
 async def embed_text(input_data: TextInput):
-    return await create_embedding(input_data.content)
+    return await create_embedding(
+        input_data.content, input_data.os_version, input_data.name
+    )

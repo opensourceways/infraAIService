@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 class SearchInput(BaseModel):
     query_text: str
+    os_version: str
     top_n: int = 5
     score_threshold: float = 0.7
 
@@ -13,6 +14,7 @@ class SearchResult(BaseModel):
     id: str
     score: float
     text: str  # 假设我们想返回结果中的文本
+    name: str
 
 
 class SearchOutput(BaseModel):
@@ -21,6 +23,8 @@ class SearchOutput(BaseModel):
 
 class TextInput(BaseModel):
     content: str
+    os_version: str
+    name: str
 
 
 class EmbeddingOutput(BaseModel):

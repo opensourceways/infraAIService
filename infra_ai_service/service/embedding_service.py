@@ -8,7 +8,7 @@ from infra_ai_service.model.model import EmbeddingOutput
 from infra_ai_service.sdk import pgvector
 
 
-async def create_embedding(content):
+async def create_embedding(content, os_version, name):
     try:
         # 确保模型已初始化
         if pgvector.model is None:
@@ -34,9 +34,10 @@ async def create_embedding(content):
         async with pgvector.pool.connection() as conn:
             async with conn.cursor() as cur:
                 await cur.execute(
-                    "INSERT INTO documents (content, embedding) "
-                    "VALUES (%s, %s) RETURNING id",
-                    (content, embedding_vector_list),  # 使用转换后的列表
+                    "INSERT INTO documents "
+                    "(content, embedding, os_version, name) "
+                    "VALUES (%s, %s, %s, %s) RETURNING id",
+                    (content, embedding_vector_list, os_version, name),
                 )
                 point_id = (await cur.fetchone())[0]
 

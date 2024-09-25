@@ -58,12 +58,17 @@ async def perform_vector_search(input_data: SearchInput):
                     """
                     SELECT id, content, embedding,
                      1 - (embedding <#> %s::vector)
-                    AS similarity
+                    AS similarity, name
                     FROM documents
+                    WHERE os_version=%s
                     ORDER BY similarity DESC
                     LIMIT %s
                     """,
-                    (embedding_vector_list, input_data.top_n),
+                    (
+                        embedding_vector_list,
+                        input_data.os_version,
+                        input_data.top_n,
+                    ),
                 )
                 rows = await cur.fetchall()
 
@@ -74,7 +79,10 @@ async def perform_vector_search(input_data: SearchInput):
             if similarity >= input_data.score_threshold:
                 results.append(
                     SearchResult(
-                        id=str(row[0]), score=similarity, text=row[1]
+                        id=str(row[0]),
+                        score=similarity,
+                        text=row[1],
+                        name=row[4],
                     )  # 内容
                 )
 
