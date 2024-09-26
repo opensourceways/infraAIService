@@ -24,8 +24,8 @@ class TestPerformVectorSearch(unittest.IsolatedAsyncioTestCase):
         mock_cur.execute = AsyncMock()
         mock_cur.fetchall = AsyncMock(
             return_value=[
-                (1, "content1", [0.5, 0.6, 0.7], 0.95),
-                (2, "content2", [0.5, 0.6, 0.7], 0.90),
+                (1, "content1", [0.5, 0.6, 0.7], 0.95, "libc"),
+                (2, "content2", [0.5, 0.6, 0.7], 0.90, "libc"),
             ]
         )
         mock_conn.cursor.return_value.__aenter__.return_value = mock_cur
@@ -44,7 +44,10 @@ class TestPerformVectorSearch(unittest.IsolatedAsyncioTestCase):
 
             # 输入数据
             test_input = SearchInput(
-                query_text="This is a test query", top_n=5, score_threshold=0.9
+                query_text="This is a test query",
+                top_n=5,
+                score_threshold=0.9,
+                os_version="ubuntu",
             )
 
             # 调用被测试的函数
@@ -63,7 +66,10 @@ class TestPerformVectorSearch(unittest.IsolatedAsyncioTestCase):
     async def test_perform_vector_search_no_model(self):
         with self.assertRaises(HTTPException) as context:
             test_input = SearchInput(
-                query_text="This is a test query", top_n=5, score_threshold=0.9
+                query_text="This is a test query",
+                top_n=5,
+                score_threshold=0.9,
+                os_version="ubuntu",
             )
             await perform_vector_search(test_input)
         self.assertEqual(context.exception.status_code, 500)

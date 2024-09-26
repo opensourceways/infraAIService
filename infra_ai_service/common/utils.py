@@ -15,6 +15,8 @@ async def setup_database(pool):
             CREATE TABLE IF NOT EXISTS {settings.TABLE_NAME} (
                 id bigserial PRIMARY KEY,
                 content text,
+                os_version text,
+                name text,
                 embedding vector({settings.VECTOR_DIMENSION})
             )
             """

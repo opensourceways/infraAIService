@@ -42,7 +42,7 @@ class TestCreateEmbedding(unittest.IsolatedAsyncioTestCase):
             test_content = "This is a test sentence"
 
             # 调用被测试的函数
-            result = await create_embedding(test_content)
+            result = await create_embedding(test_content, "ubuntu", "libc")
 
             # 检查返回结果
             self.assertIsInstance(result, EmbeddingOutput)
@@ -55,5 +55,5 @@ class TestCreateEmbedding(unittest.IsolatedAsyncioTestCase):
 
     async def test_create_embedding_no_model(self):
         with self.assertRaises(HTTPException) as context:
-            await create_embedding("test input")
+            await create_embedding("test input", "ubuntu", "libc")
         self.assertEqual(context.exception.status_code, 400)
