@@ -37,6 +37,8 @@ class Settings(BaseSettings):
     REPAIR_PRO_AI_MODEL: str = ""
     OPENAI_API_KEY: str = ""
     OPENAI_BASE_URL: str = ""
+    SRC_RPM_DIR: str = "/tmp/infra_ai_service/"
+    XML_EXTRACT_PATH: str = ""
 
     @property
     def BASE_URL(self) -> str:
@@ -48,6 +50,7 @@ class Settings(BaseSettings):
     class Config:
         env_file = f"{BASE_DIR}/.env"
         env_file_encoding = "utf-8"
+
         fields = {
             "_BASE_URL": {"env": "BASE_URL"},
             "DB_NAME": {"env": "DB_NAME"},
@@ -60,16 +63,14 @@ class Settings(BaseSettings):
             "TABLE_NAME": {"env": "TABLE_NAME"},
             "VECTOR_DIMENSION": {"env": "VECTOR_DIMENSION"},
             "LANGUAGE": {"env": "LANGUAGE"},
-            "HOST": {
-                "env": "HOST",
-            },
-            "PORT": {
-                "env": "PORT",
-            },
+            "HOST": {"env": "HOST"},
+            "PORT": {"env": "PORT"},
             "SPECBOT_AI_MODEL": {"env": "SPECBOT_AI_MODEL"},
             "REPAIR_PRO_AI_MODEL": {"env": "REPAIR_PRO_AI_MODEL"},
             "OPENAI_API_KEY": {"env": "OPENAI_API_KEY"},
             "OPENAI_BASE_URL": {"env": "OPENAI_BASE_URL"},
+            "SRC_RPM_DIR": {"env": "SRC_RPM_DIR"},
+            "XML_EXTRACT_PATH": {"env": "XML_EXTRACT_PATH"},
         }
 
 
