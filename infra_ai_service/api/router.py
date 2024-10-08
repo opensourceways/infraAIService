@@ -10,10 +10,16 @@ from infra_ai_service.api.ai_enhance.vector_search import (
     router as vector_search_router,
 )
 from infra_ai_service.api.system.status import router as status_router
+from infra_ai_service.api.ai_enhance.feature_insert import (
+    router as feature_insert
+)
 
 api_router = APIRouter()
 api_router.include_router(
     spec_repair_process, prefix="/spec-repair", tags=["repair"]
+)
+api_router.include_router(
+    feature_insert, prefix="/feature-insert", tags=["feature"]
 )
 api_router.include_router(
     embedding_router, prefix="/embedding", tags=["embedding"]
