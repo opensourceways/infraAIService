@@ -15,6 +15,7 @@ RUN yum update -y && \
     python3-devel \
     gcc \
     make \
+    rpmdevtools* \
     && yum clean all
 
 # 创建符号链接，仅为 python 创建
