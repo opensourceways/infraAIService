@@ -57,11 +57,24 @@ curl -X POST http://localhost:8000/api/v1/spec-repair/ -F err_spec_file=@/path/r
 
 ## 访问feature-insert API
 
+先配置os对应的xml文件
+```shell
+curl -X POST https://localhost:8000/api/v1/feature-insert/xml/ \
+	-H "Content-Type: application/json" \
+	-d '{"xml_url":"https://repo.openeuler.org/example-primary.xml.zst","os_version":"openEuler-24.03"}'
+```
+响应格式:
+```python
+{  
+    'status': 'success'
+}
+```
+
 服务启动后可使用如下命令访问服务
 ```shell
 curl -X POST http://localhost:8000/api/v1/feature-insert/ \
      -H "Content-Type: application/json" \
-     -d '{"src_rpm_url":"https://repo.openeuler.org/ansible-lint-4.2.0.src.rpm","os_version":"openEuler-24.03"}'
+     -d '{"src_rpm_url":"https://repo.openeuler.org/ansible-lint-4.2.0.src.rpm","os_version":"openEuler-24.03","package_name":"ansible-lint"}'
 ```
 响应格式:
 ```python
