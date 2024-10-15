@@ -52,8 +52,8 @@ def _get_func_with_name(name: str):
     process_func = {
         'name': _process_func_common,
         'version': _process_func_version,
-        'summary': _process_func_common,
-        'description': _process_func_common,
+        # 'summary': _process_func_common,
+        # 'description': _process_func_common,
         'url': _process_func_common,
         'format': _process_func_requires,
     }
