@@ -5,6 +5,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 from infra_ai_service.service.embedding_service import create_embedding
+from infra_ai_service.service.utils import convert_to_str
 from infra_ai_service.service.extract_spec import (
     process_src_rpm_from_url,
     extract_spec_features,
@@ -56,11 +57,14 @@ async def feature_insert(request: FeatureInsertRequest = Body(...)):
 
         name = request.package_name if request.package_name else name
 
-        feature_str = re.sub(r"[{}[\]()@#.\':\/-]", "", str(feature))
+        ordered_feature = convert_to_str(feature[1])
+        feature_str = re.sub(r"[{}[\]()@#.\':\/-]", "", str(ordered_feature))
+
         await create_embedding(feature_str, request.os_version, name)
 
         resp_data = {
             "status": "success",
+            "insert_content": f"{ordered_feature}"
         }
         return JSONResponse(content=resp_data)
     except Exception as e:

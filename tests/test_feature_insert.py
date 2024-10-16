@@ -282,7 +282,6 @@ class TestFeatureInsert(unittest.TestCase):
 
         xml_expected = {
             1: {
-                'description': 'Best practices checker for Ansible',
                 'name': 'ansible-lint',
                 'requires': [
                     'ansible',
@@ -298,7 +297,6 @@ class TestFeatureInsert(unittest.TestCase):
                     'python3.11dist(ruamel.yaml)',
                     'python3.11dist(setuptools)',
                     'python3.11dist(six)'],
-                'summary': 'Best practices checker for Ansible',
                 'url': 'https://github.com/ansible/ansible-lint',
                 'version': '4.2'
             },

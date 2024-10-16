@@ -121,6 +121,7 @@ def _process_provides(provides, data_count):
         if p.find('=') != -1:
             p = (p.split('=')[0].strip())
 
+        p = re.sub(r'\(x86-64\)', '', p).strip()
         p = re.sub(r'\(aarch-64\)', '', p).strip()
         p = re.sub(r'-debuginfo$', '', p).strip()
         p = re.sub(r'-debugsource$', '', p).strip()

@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import json
+from collections import OrderedDict
 
 
 def _get_and_check_name(info: dict):
@@ -52,3 +53,17 @@ def update_json(j_xml: dict, j_spec: dict):
 def write_json(file, data):
     with open(file, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=4)
+
+
+def convert_to_str(data: dict):
+    ordered_keys = [
+        'name', 'version', 'summary', 'description', 'url', 'requires',
+        'binaryList', 'provides', 'buildRequires', 'source0', 'macro_names',
+        'email_names', 'class_names', 'path_names', 'url_names'
+    ]
+    ordered_dict = OrderedDict()
+    for key in ordered_keys:
+        if key in data:
+            ordered_dict[key] = data[key]
+
+    return json.dumps(ordered_dict)
