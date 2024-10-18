@@ -57,7 +57,7 @@ async def perform_vector_search(input_data: SearchInput):
                 await cur.execute(
                     """
                     SELECT id, content, embedding,
-                     1 - (embedding <#> %s::vector)
+                     1 - (embedding <=> %s::vector)
                     AS similarity, name
                     FROM documents
                     WHERE os_version=%s
