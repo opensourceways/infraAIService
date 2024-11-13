@@ -16,10 +16,18 @@ RUN yum update -y && \
     gcc \
     make \
     rpmdevtools* \
+    wget \
     && yum clean all
+
+RUN wget https://github.com/BurntSushi/ripgrep/releases/download/14.1.1/ripgrep-14.1.1-x86_64-unknown-linux-musl.tar.gz && \
+    tar -zxvf ripgrep-14.1.1-x86_64-unknown-linux-musl.tar.gz && \
+    mv ripgrep*/rg /usr/local/bin/ && \
+    rg --version
 
 # 创建符号链接，仅为 python 创建
 RUN ln -s /usr/bin/python3 /usr/bin/python
+
+RUN pip install pgcli
 
 # 复制 requirements.txt 到容器中
 COPY requirements.txt .

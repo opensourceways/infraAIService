@@ -22,9 +22,14 @@ class Settings(BaseSettings):
     DB_PASSWORD: str = ""
     DB_HOST: str = ""
     DB_PORT: int = 0
+    POOL_MIN: int = 1
+    POOL_MAX: int = 10
 
     # 模型名称配置项
     MODEL_NAME: str = "model-name-here"
+
+    PROXY_URL: str = ""
+    PROXY_TOKEN: str = ""
 
     # 新增的配置项
     VECTOR_EXTENSION: str = ""
@@ -37,6 +42,7 @@ class Settings(BaseSettings):
     REPAIR_PRO_AI_MODEL: str = ""
     OPENAI_API_KEY: str = ""
     OPENAI_BASE_URL: str = ""
+
     SRC_RPM_DIR: str = "/tmp/infra_ai_service/"
 
     @property
@@ -57,7 +63,11 @@ class Settings(BaseSettings):
             "DB_PASSWORD": {"env": "DB_PASSWORD"},
             "DB_HOST": {"env": "DB_HOST"},
             "DB_PORT": {"env": "DB_PORT"},
+            "POOL_MIN": {"env": "POOL_MIN"},
+            "POOL_MAX": {"env": "POOL_MAX"},
             "MODEL_NAME": {"env": "MODEL_NAME"},
+            "PROXY_URL": {"env": "PROXY_URL"},
+            "PROXY_TOKEN": {"env": "PROXY_TOKEN"},
             "VECTOR_EXTENSION": {"env": "VECTOR_EXTENSION"},
             "TABLE_NAME": {"env": "TABLE_NAME"},
             "VECTOR_DIMENSION": {"env": "VECTOR_DIMENSION"},

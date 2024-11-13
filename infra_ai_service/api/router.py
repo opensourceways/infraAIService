@@ -11,7 +11,7 @@ from infra_ai_service.api.ai_enhance.vector_search import (
 )
 from infra_ai_service.api.system.status import router as status_router
 from infra_ai_service.api.ai_enhance.feature_insert import (
-    router as feature_insert
+    router as feature_insert,
 )
 
 api_router = APIRouter()

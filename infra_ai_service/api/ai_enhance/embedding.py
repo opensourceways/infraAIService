@@ -6,8 +6,8 @@ from infra_ai_service.service.embedding_service import create_embedding
 router = APIRouter()
 
 
-@router.post("/embed/", response_model=EmbeddingOutput)
+@router.post("", response_model=EmbeddingOutput)
 async def embed_text(input_data: TextInput):
-    return await create_embedding(
+    return create_embedding(
         input_data.content, input_data.os_version, input_data.name
     )
