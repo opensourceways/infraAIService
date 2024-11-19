@@ -6,7 +6,7 @@ from infra_ai_service.service.spec_repair import SpecBot
 router = APIRouter()
 
 
-@router.post("/")
+@router.post("")
 async def spec_repair_process(
     err_spec_file: UploadFile = File(...), err_log_file: UploadFile = File(...)
 ):

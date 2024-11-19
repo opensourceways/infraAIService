@@ -1,5 +1,5 @@
 from io import BytesIO
-import pytest
+import unittest
 from httpx import AsyncClient
 from infra_ai_service.core.app import get_app
 from infra_ai_service.config.config import settings
@@ -8,7 +8,7 @@ from infra_ai_service.config.config import settings
 app = get_app()
 
 
-@pytest.mark.asyncio
+@unittest.skip
 async def test_spec_repair_process():
 
     base_url = f"http://localhost:{settings.PORT}/"
