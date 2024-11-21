@@ -6,6 +6,8 @@ import copy
 import urllib.request
 import re
 import tempfile
+import uuid
+
 from loguru import logger
 from infra_ai_service.config.config import settings
 from infra_ai_service.service.extract_xml import extract_xml_features
@@ -14,11 +16,11 @@ from infra_ai_service.service.utils import update_json
 XML_INFO = None
 
 
-def _download_from_url(url, rpm_path):
+def _download_from_url(url, file_path):
     try:
-        urllib.request.urlretrieve(url, filename=rpm_path)
+        urllib.request.urlretrieve(url, filename=file_path)
     except Exception as e:
-        raise Exception(f"download src.rpm fail: {e}")
+        raise Exception(f"download file fail: {e}")
 
 
 def _decompress_src_rpm(rpm_path):
@@ -357,3 +359,218 @@ def extract_spec_features(dir_path: str):
     data = update_json(xml_info, data)
 
     return data
+
+
+def process_src_deb_from_url(url: str):
+    if not url.endswith(".dsc"):
+        raise Exception("URL of .dsc may be wrong")
+
+    file_save_all_dir = os.path.expanduser(settings.SRC_DEB_DIR)
+    if not os.path.exists(file_save_all_dir):
+        os.makedirs(file_save_all_dir)
+
+    # download the .dsc file
+    time_based_uuid = uuid.uuid1()
+    file_save_dir = os.path.join(file_save_all_dir, time_based_uuid.__str__())
+    if os.path.exists(file_save_dir):
+        os.unlink(file_save_dir)
+    os.makedirs(file_save_dir)
+    dsc_path = os.path.join(file_save_dir, "tmp.dsc")
+
+    _download_from_url(url, dsc_path)
+
+    # Use 'dget' to download and extract the source package
+    try:
+        cmd = ["dget", "-u", url]  # -u to skip signature check
+        res = subprocess.run(cmd, cwd=file_save_dir, stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE)
+        if res.returncode != 0:
+            raise Exception(f"dget failed: {res.stderr.decode()}")
+    except Exception as e:
+        raise Exception(f"dget command failed: {e}")
+
+    # Parse the .dsc file to get the source directory
+    with open(dsc_path, 'r') as f:
+        dsc_content = f.read()
+
+    import re
+    source_match = re.search(r'^Source:\s*(.*)$', dsc_content, re.MULTILINE)
+    version_match = re.search(r'^Version:\s*(.*)-.*$', dsc_content,
+                              re.MULTILINE)
+    if not source_match or not version_match:
+        raise Exception("Failed to parse Source or Version from .dsc file")
+    source_name = source_match.group(1)
+    version = version_match.group(1)
+    source_dir = os.path.join(file_save_dir, f"{source_name}-{version}")
+    if not os.path.exists(source_dir):
+        # Try underscore instead of hyphen
+        source_dir = os.path.join(file_save_dir, f"{source_name}_{version}")
+        if not os.path.exists(source_dir):
+            raise Exception(f"Source directory not found: {source_dir}")
+    return file_save_dir
+
+
+def dealing_with_dsc_content(dir_path: str):
+    # Find the .dsc file in the dir_path
+    dsc_file = None
+    for file in os.listdir(dir_path):
+        if file.endswith(".dsc"):
+            dsc_file = os.path.join(dir_path, file)
+            break
+    if not dsc_file:
+        raise Exception("No .dsc file found in source directory")
+
+    # Parse the .dsc file
+    with open(dsc_file, 'r') as f:
+        dsc_content = f.read()
+
+    fields = {
+        "Source": "",
+        "Binary": "",
+        "Version": "",
+        "Homepage": "",
+        "Build-Depends": "",
+        "Package-List": ""
+    }
+
+    for field in fields:
+        start_index = dsc_content.find(field + ":")
+        if start_index != -1:
+            if field == "Package-List":
+                start_index += len(field) + 1
+                end_index = dsc_content.find("Checksums", start_index)
+                if end_index == -1:
+                    end_index = len(dsc_content)
+                fields[field] = dsc_content[start_index:end_index].strip()
+            else:
+                start_index += len(field) + 1
+                end_index = dsc_content.find("\n", start_index)
+                fields[field] = dsc_content[start_index:end_index].strip()
+
+    # Format the fields into the desired data structure
+    data_count = format_fields(fields)
+    for index in range(len(data_count["binaryList"])):
+        data_count["binaryList"][index] = data_count["binaryList"][
+            index].replace(',', '').strip()
+    for index in range(len(data_count["requires"])):
+        data_count["requires"][index] = data_count["requires"][index].strip()
+        if data_count["requires"][index].find('(') != -1:
+            data_count["requires"][index] = \
+                data_count["requires"][index].split('(')[0].strip()
+    for index in range(len(data_count["provides"])):
+        data_count["provides"][index] = \
+            data_count["provides"][index].strip().split(' ')[0]
+
+    return data_count
+
+
+def dealing_with_src_macro_name(src_dir, data_count):
+    # macro_names
+    cmd_macro = "grep -E -Irho '\<[A-Z]+_[A-Z]+\>' '" + src_dir + "' | sort | uniq -c | sort -nr | head -10"
+    macro_str = subprocess.getoutput(cmd_macro)
+    macro_names = []
+    if macro_str:
+        for line in macro_str.strip().split('\n'):
+            if "Permission denied" not in line:
+                macro_names.append(line.strip().split()[-1])
+    data_count['macro_names'] = macro_names
+
+
+def dealing_with_src_email_names(src_dir, data_count):
+    # email_names
+    cmd_email = "grep -E -Irho '\<[a-z]+@[a-z]+\.[a-z.]+\>' '" + src_dir + "' | sort | uniq -c | sort -nr | head -10"
+    email_str = subprocess.getoutput(cmd_email)
+    email_names = []
+    if email_str:
+        for line in email_str.strip().split('\n'):
+            if "Permission denied" not in line:
+                email_names.append(line.strip().split()[-1])
+    data_count['email_names'] = email_names
+
+
+def dealing_with_src_class_names(src_dir, data_count):
+    # class_names
+    cmd_class = "grep -rho '[A-Z][a-z]\{3,\}[A-Z][a-z]\{3,\}' '" + src_dir + "' | sort | uniq -c | sort -nr | head -10"
+    class_str = subprocess.getoutput(cmd_class)
+    class_names = []
+    if class_str:
+        for line in class_str.strip().split('\n'):
+            if "Permission denied" not in line:
+                class_names.append(line.strip().split()[-1])
+    data_count['class_names'] = class_names
+
+
+def dealing_with_src_path_names(src_dir, data_count):
+    # path_names
+    cmd_path = "grep -E -Irho '\"/[A-Za-z.]+(/[A-Za-z.]+)*\"' '" + src_dir + "' | sort | uniq -c | sort -nr | head -10"
+    path_str = subprocess.getoutput(cmd_path)
+    path_names = []
+    if path_str:
+        for line in path_str.strip().split('\n'):
+            if "Permission denied" not in line:
+                path = line.strip().split()[-1].replace('"', '')
+                path_names.append(path)
+    data_count['path_names'] = path_names
+
+
+def dealing_with_src_url_names(src_dir, data_count):
+    # url_names
+    cmd_url = "grep -E -Irho '\"(https?|ftp)://([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,6}(/.*)?\"' '" + src_dir + "' | sort | uniq -c | sort -nr | head -10"
+    url_str = subprocess.getoutput(cmd_url)
+    url_names = []
+    if url_str:
+        for line in url_str.strip().split('\n'):
+            if "Permission denied" not in line:
+                if line.strip().split(' ')[0].isdigit():
+                    url_name = line.strip().split(' ')[1]
+                    if url_name.endswith('\"') is False:
+                        url_name += '\"'
+                    start = url_name.find('\"')
+                    end = url_name[start + 1:].find('\"')
+                    if start + end + 1 == len(url_name) - 1:
+                        if url_name.replace('\"', '') != "":
+                            url_names.append(url_name.replace('\"', ''))
+                    else:
+                        if url_name[1: start + end + 1] != "":
+                            url_names.append(url_name[1: start + end + 1])
+    data_count['url_names'] = url_names
+
+
+def extract_dsc_features(dir_path: str):
+    if not os.path.exists(dir_path):
+        raise Exception("Source directory does not exist")
+
+    data_count = dealing_with_dsc_content(dir_path)
+
+    src_dir = dir_path
+
+    dealing_with_src_macro_name(src_dir, data_count)
+
+    dealing_with_src_email_names(src_dir, data_count)
+
+    dealing_with_src_class_names(src_dir, data_count)
+
+    dealing_with_src_path_names(src_dir, data_count)
+
+    dealing_with_src_url_names(src_dir, data_count)
+
+    return data_count
+
+
+def format_fields(fields):
+    formatted_fields = {
+        "name": fields.get("Source", ""),
+        "binaryList": fields.get("Binary", "").replace(',', '').split(),
+        "version": fields.get("Version", ""),
+        "url": fields.get("Homepage", ""),
+        "requires": [req.strip().split('(')[0].strip() for req in
+                     fields.get("Build-Depends", "").split(",")],
+        "provides": [line.strip().split(' ')[0] for line in
+                     fields.get("Package-List", "").split("\n") if
+                     line.strip()],
+        "description": "",
+        "summary": "",
+        "buildRequires": [],
+        "source0": ""
+    }
+    return formatted_fields
