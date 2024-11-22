@@ -45,7 +45,9 @@ async def feature_insert(request: FeatureInsertRequest = Body(...)):
             )
 
         # download and decompress .src.rpm file
-        rpm_decompress_dir = process_src_rpm_from_url(request.src_rpm_url)
+        rpm_decompress_dir = await process_src_rpm_from_url(
+            request.src_rpm_url
+        )
         logger.info(
             f"process src rpm finished rpm_decompress_dir:{rpm_decompress_dir}"
         )
@@ -75,7 +77,7 @@ async def feature_insert(request: FeatureInsertRequest = Body(...)):
 
 
 @router.post("/xml/")
-def config_xml(request: FeatureInsertXml = Body(...)):
+async def config_xml(request: FeatureInsertXml = Body(...)):
     try:
         if not request.force_refresh and es.XML_INFO is not None:
             latest_version = es.XML_INFO.get("os_version", None)
@@ -85,7 +87,7 @@ def config_xml(request: FeatureInsertXml = Body(...)):
                     "need to config with 'force_refresh'=True"
                 )
 
-        es.XML_INFO = check_xml_info(request.xml_url, request.os_version)
+        es.XML_INFO = await check_xml_info(request.xml_url, request.os_version)
         resp_data = {
             "status": "success",
         }

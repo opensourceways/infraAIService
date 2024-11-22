@@ -63,14 +63,14 @@ class TestFeatureInsert(unittest.TestCase):
             self.assertIn("error", content)
             self.assertIn("download src.rpm fail", content)
 
-    def test_decompress_src_rpm_fail(self):
+    async def test_decompress_src_rpm_fail(self):
         with tempfile.TemporaryDirectory() as src_rpm_dir:
             src_rpm_path = os.path.join(src_rpm_dir, "tmp.src.rpm")
             with open(src_rpm_path, "w") as f:
                 f.write("This is a simulated .src.rpm package.\n")
 
             try:
-                _decompress_src_rpm(src_rpm_path)
+                await _decompress_src_rpm(src_rpm_path)
             except Exception as e:
                 prefix = str(e)[:23]
                 self.assertEqual("decompress src.rpm fail", prefix)
@@ -263,7 +263,7 @@ class TestFeatureInsert(unittest.TestCase):
     @patch("urllib.request.urlretrieve")
     @patch("os.path.exists", return_value=True)
     @patch("subprocess.run")
-    def test_extract_xml_features(
+    async def test_extract_xml_features(
         self, mock_run, mock_exists, mock_urlretrieve, mock_parse
     ):
         TEST_XML_URL = "http://example.com/primary.xml.zst"
@@ -310,7 +310,7 @@ class TestFeatureInsert(unittest.TestCase):
         mock_run.return_value = MagicMock(
             returncode=0, stdout=None, stderr=None
         )
-        result = check_xml_info(TEST_XML_URL, TEST_OS_VERSION)
+        result = await check_xml_info(TEST_XML_URL, TEST_OS_VERSION)
         xml_expected = {
             1: {
                 "name": "ansible-lint",

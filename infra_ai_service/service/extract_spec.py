@@ -10,13 +10,19 @@ from loguru import logger
 from infra_ai_service.config.config import settings
 from infra_ai_service.service.extract_xml import extract_xml_features
 from infra_ai_service.service.utils import update_json
+import asyncio
 
 XML_INFO = None
 
 
-def _download_from_url(url, rpm_path):
+async def _download_from_url(url, rpm_path):
     try:
-        urllib.request.urlretrieve(url, filename=rpm_path)
+        await asyncio.get_event_loop().run_in_executor(
+            None,
+            urllib.request.urlretrieve,
+            url,
+            rpm_path
+        )
     except Exception as e:
         raise Exception(f"download src.rpm fail: {e}")
 
@@ -84,7 +90,7 @@ def _decompress_tar_file(rpm_dir):
         raise Exception(f"decompress tar file error: {e}")
 
 
-def process_src_rpm_from_url(url: str):
+async def process_src_rpm_from_url(url: str):
     if not url.endswith(".src.rpm"):
         raise Exception("url of src.rpm may be wrong")
 
@@ -95,7 +101,7 @@ def process_src_rpm_from_url(url: str):
 
     # download .src.rpm file
     rpm_path = os.path.join(file_save_dir, "tmp.src.rpm")
-    _download_from_url(url, rpm_path)
+    await _download_from_url(url, rpm_path)
 
     # decompress .src.rpm file
     rpm_dir = _decompress_src_rpm(rpm_path)
@@ -287,18 +293,26 @@ def _process_src_dir(src_path, data, count):
 def decompress_xml_file(feature_xml_path: str):
     if feature_xml_path.endswith(".xml.zst"):
         cmd = ["zstd", "-d", feature_xml_path]
-        dep_res = subprocess.run(cmd)
+        dep_res = subprocess.run(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
 
     if feature_xml_path.endswith(".xml.gz"):
         cmd = ["gzip", "-d", feature_xml_path]
-        dep_res = subprocess.run(cmd)
+        dep_res = subprocess.run(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
 
     logger.info("decompress xml file finished")
     if dep_res.returncode != 0:
         raise ValueError(f"delete redundant dir fail: {dep_res.stderr}")
 
 
-def check_xml_info(xml_url: str, os_version: str):
+async def check_xml_info(xml_url: str, os_version: str):
     """
     :param force_refresh: refresh xml feature info from xml file
     :type bool
@@ -310,7 +324,7 @@ def check_xml_info(xml_url: str, os_version: str):
             base_name = f"{os_version}.xml.gz"
 
         feature_xml_path = os.path.join(src_rpm_dir, base_name)
-        _download_from_url(xml_url, feature_xml_path)
+        await _download_from_url(xml_url, feature_xml_path)
         decompress_xml_file(feature_xml_path)
 
         feature_xml_path = feature_xml_path.replace(".zst", "")
