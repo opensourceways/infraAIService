@@ -52,5 +52,6 @@ for component in components:
                                     json.dump(processed_dsc_urls, f)
                             else:
                                 print(
-                                    f"Error posting data for {package_name}: {response.text}")
+                                    f"Error posting data for {package_name}:"
+                                    f" {response.text}")
                     idx += 1
