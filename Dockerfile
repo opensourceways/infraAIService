@@ -17,6 +17,7 @@ RUN yum update -y && \
     make \
     rpmdevtools* \
     wget \
+    dget \
     && yum clean all
 
 RUN wget https://github.com/BurntSushi/ripgrep/releases/download/14.1.1/ripgrep-14.1.1-x86_64-unknown-linux-musl.tar.gz && \
