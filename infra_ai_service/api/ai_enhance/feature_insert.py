@@ -33,62 +33,72 @@ class FeatureInsertXml(BaseModel):
     force_refresh: bool = False
 
 
+def dealing_with_rpm(request: FeatureInsertRequest):
+    if not es.XML_INFO:
+        raise Exception(
+            "need config xml with API '/feature-insert/xml/'")
+
+    xml_version = es.XML_INFO.get("os_version", "%v!@#")  # foolproof
+    if xml_version != request.os_version:
+        raise Exception(
+            "xml os version conflict, please config xml again,"
+            f"{xml_version}:{request.os_version}")
+    # process .src.rpm file
+    rpm_decompress_dir = process_src_rpm_from_url(request.src_rpm_url)
+    logger.info(
+        f"process src rpm finished rpm_decompress_dir:{rpm_decompress_dir}"
+    )
+    feature = extract_spec_features(
+        rpm_decompress_dir,
+    )
+    logger.info(f"extract spec features finished feature:{feature}")
+    name = feature[1]["name"]
+    if name != request.package_name:
+        logger.debug(
+            f"name difference {name}: {request.package_name}")
+
+    name = request.package_name if request.package_name else name
+
+    ordered_feature = convert_to_str(feature[1])
+    feature_str = re.sub(r"[{}[\]()@#.\':\/-]", "",
+                         str(ordered_feature))
+    logger.info(f"feature_str build finished:{feature_str}")
+    create_embedding(feature_str, request.os_version, name)
+    return ordered_feature
+
+
+def dealing_with_deb(request: FeatureInsertRequest):
+    # process .dsc file
+    deb_decompress_dir = process_src_deb_from_url(request.src_deb_url)
+    logger.info(
+        f"process src deb finished deb_decompress_dir:{deb_decompress_dir}"
+    )
+    feature = extract_dsc_features(
+        deb_decompress_dir,
+    )
+    logger.info(f"extract deb features finished feature:{feature}")
+    name = feature["name"]
+    if name != request.package_name:
+        logger.debug(
+            f"name difference {name}: {request.package_name}")
+
+    name = request.package_name if request.package_name else name
+
+    ordered_feature = convert_to_str(feature)
+    feature_str = re.sub(r"[{}[\]()@#.\':\/-]", "",
+                         str(ordered_feature))
+    logger.info(f"feature_str build finished:{feature_str}")
+    create_embedding(feature_str, request.os_version, name)
+    return ordered_feature
+
+
 @router.post("/")
 async def feature_insert(request: FeatureInsertRequest = Body(...)):
     try:
         if request.src_rpm_url:
-            if not es.XML_INFO:
-                raise Exception(
-                    "need config xml with API '/feature-insert/xml/'")
-
-            xml_version = es.XML_INFO.get("os_version", "%v!@#")  # foolproof
-            if xml_version != request.os_version:
-                raise Exception(
-                    "xml os version conflict, please config xml again,"
-                    f"{xml_version}:{request.os_version}")
-            # process .src.rpm file
-            rpm_decompress_dir = process_src_rpm_from_url(request.src_rpm_url)
-            logger.info(
-                f"process src rpm finished rpm_decompress_dir:{rpm_decompress_dir}"
-            )
-            feature = extract_spec_features(
-                rpm_decompress_dir,
-            )
-            logger.info(f"extract spec features finished feature:{feature}")
-            name = feature[1]["name"]
-            if name != request.package_name:
-                logger.debug(
-                    f"name difference {name}: {request.package_name}")
-
-            name = request.package_name if request.package_name else name
-
-            ordered_feature = convert_to_str(feature[1])
-            feature_str = re.sub(r"[{}[\]()@#.\':\/-]", "",
-                                 str(ordered_feature))
-            logger.info(f"feature_str build finished:{feature_str}")
-            create_embedding(feature_str, request.os_version, name)
+            ordered_feature = dealing_with_rpm(request)
         elif request.src_deb_url:
-            # process .dsc file
-            deb_decompress_dir = process_src_deb_from_url(request.src_deb_url)
-            logger.info(
-                f"process src deb finished deb_decompress_dir:{deb_decompress_dir}"
-            )
-            feature = extract_dsc_features(
-                deb_decompress_dir,
-            )
-            logger.info(f"extract deb features finished feature:{feature}")
-            name = feature["name"]
-            if name != request.package_name:
-                logger.debug(
-                    f"name difference {name}: {request.package_name}")
-
-            name = request.package_name if request.package_name else name
-
-            ordered_feature = convert_to_str(feature)
-            feature_str = re.sub(r"[{}[\]()@#.\':\/-]", "",
-                                 str(ordered_feature))
-            logger.info(f"feature_str build finished:{feature_str}")
-            create_embedding(feature_str, request.os_version, name)
+            ordered_feature = dealing_with_deb(request)
         else:
             raise Exception(
                 "Either src_rpm_url or src_deb_url must be provided")
