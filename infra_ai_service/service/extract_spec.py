@@ -466,7 +466,8 @@ def dealing_with_dsc_content(dir_path: str):
 
 def dealing_with_src_macro_name(src_dir, data_count):
     # macro_names
-    cmd_macro = "grep -E -Irho '\<[A-Z]+_[A-Z]+\>' '" + src_dir + "' | sort | uniq -c | sort -nr | head -10"
+    cmd_macro = "grep -E -Irho '\\<[A-Z]+_[A-Z]+\\>' '" + src_dir + ("' | "
+                                                                     "sort | uniq -c | sort -nr | head -10")
     macro_str = subprocess.getoutput(cmd_macro)
     macro_names = []
     if macro_str:
@@ -478,7 +479,8 @@ def dealing_with_src_macro_name(src_dir, data_count):
 
 def dealing_with_src_email_names(src_dir, data_count):
     # email_names
-    cmd_email = "grep -E -Irho '\<[a-z]+@[a-z]+\.[a-z.]+\>' '" + src_dir + "' | sort | uniq -c | sort -nr | head -10"
+    cmd_email = ("grep -E -Irho '\\<[a-z]+@[a-z]+\\.[a-z.]+\\>' '" + src_dir
+                 + "' | sort | uniq -c | sort -nr | head -10")
     email_str = subprocess.getoutput(cmd_email)
     email_names = []
     if email_str:
@@ -490,7 +492,9 @@ def dealing_with_src_email_names(src_dir, data_count):
 
 def dealing_with_src_class_names(src_dir, data_count):
     # class_names
-    cmd_class = "grep -rho '[A-Z][a-z]\{3,\}[A-Z][a-z]\{3,\}' '" + src_dir + "' | sort | uniq -c | sort -nr | head -10"
+    cmd_class = ("grep -rho '[A-Z][a-z]\\{3,\\}[A-Z][a-z]\\{3,\\}' '" +
+                 src_dir
+                 + "' | sort | uniq -c | sort -nr | head -10")
     class_str = subprocess.getoutput(cmd_class)
     class_names = []
     if class_str:
@@ -502,7 +506,8 @@ def dealing_with_src_class_names(src_dir, data_count):
 
 def dealing_with_src_path_names(src_dir, data_count):
     # path_names
-    cmd_path = "grep -E -Irho '\"/[A-Za-z.]+(/[A-Za-z.]+)*\"' '" + src_dir + "' | sort | uniq -c | sort -nr | head -10"
+    cmd_path = ("grep -E -Irho '\"/[A-Za-z\\.]+(/[A-Za-z\\.]+)*\"' '" +
+                src_dir + "' | sort | uniq -c | sort -nr | head -10")
     path_str = subprocess.getoutput(cmd_path)
     path_names = []
     if path_str:
@@ -515,7 +520,8 @@ def dealing_with_src_path_names(src_dir, data_count):
 
 def dealing_with_src_url_names(src_dir, data_count):
     # url_names
-    cmd_url = "grep -E -Irho '\"(https?|ftp)://([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,6}(/.*)?\"' '" + src_dir + "' | sort | uniq -c | sort -nr | head -10"
+    cmd_url = ("grep -E -Irho '\"(https?|ftp)://([a-zA-Z0-9-]+\\.)+[a-zA-Z]{"
+               "2,6}(/.*)?\"' '") + src_dir + "' | sort | uniq -c | sort -nr | head -10"
     url_str = subprocess.getoutput(cmd_url)
     url_names = []
     if url_str:
