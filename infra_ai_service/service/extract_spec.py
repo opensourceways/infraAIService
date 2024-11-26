@@ -466,8 +466,8 @@ def dealing_with_dsc_content(dir_path: str):
 
 def dealing_with_src_macro_name(src_dir, data_count):
     # macro_names
-    cmd_macro = "grep -E -Irho '\\<[A-Z]+_[A-Z]+\\>' '" + src_dir + ("' | "
-                                                                     "sort | uniq -c | sort -nr | head -10")
+    cmd_macro = "grep -E -Irho '\\<[A-Z]+_[A-Z]+\\>' '" + src_dir + (
+        "' | sort | uniq -c | sort -nr | head -10")
     macro_str = subprocess.getoutput(cmd_macro)
     macro_names = []
     if macro_str:
@@ -520,8 +520,9 @@ def dealing_with_src_path_names(src_dir, data_count):
 
 def dealing_with_src_url_names(src_dir, data_count):
     # url_names
-    cmd_url = ("grep -E -Irho '\"(https?|ftp)://([a-zA-Z0-9-]+\\.)+[a-zA-Z]{"
-               "2,6}(/.*)?\"' '") + src_dir + "' | sort | uniq -c | sort -nr | head -10"
+    cmd_url = (("grep -E -Irho '\"(https?|ftp)://([a-zA-Z0-9-]+\\.)+[a-zA-Z]{"
+                "2,6}(/.*)?\"' '") +
+               src_dir + "' | sort | uniq -c | sort -nr | head -10")
     url_str = subprocess.getoutput(cmd_url)
     url_names = []
     if url_str:

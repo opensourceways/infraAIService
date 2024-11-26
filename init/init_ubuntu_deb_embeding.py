@@ -47,8 +47,10 @@ for component in components:
                             response = requests.post(api_url, json=payload)
                             if response.status_code == 200:
                                 processed_dsc_urls[dsc_url] = True  # 标记为已处理
-                                with open('processed_dsc_urls.json', 'w') as f:
+                                with open('processed_dsc_urls.json',
+                                          'w') as f:
                                     json.dump(processed_dsc_urls, f)
                             else:
-                                print(f"Error posting data for {package_name}: {response.text}")
+                                print(
+                                    f"Error posting data for {package_name}: {response.text}")
                     idx += 1
