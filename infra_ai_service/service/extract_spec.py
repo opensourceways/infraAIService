@@ -379,15 +379,21 @@ def process_src_deb_from_url(url: str):
 
     _download_from_url(url, dsc_path)
 
-    # Use 'dget' to download and extract the source package
+    cmd = [
+        "chroot", "/mnt/debian", "bash", "-c",
+        f"cd /root/{time_based_uuid.__str__()} && dget -u {url}"
+    ]
+
     try:
-        cmd = ["dget", "-u", url]  # -u to skip signature check
-        res = subprocess.run(cmd, cwd=file_save_dir, stdout=subprocess.PIPE,
-                             stderr=subprocess.PIPE)
+        res = subprocess.run(cmd, stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE, text=True)
         if res.returncode != 0:
-            raise Exception(f"dget failed: {res.stderr.decode()}")
+            raise Exception(f"dget failed: {res.stderr}")
+        print(
+            f"Source package downloaded and extracted successfully to {file_save_dir}")
     except Exception as e:
-        raise Exception(f"dget command failed: {e}")
+        raise Exception(
+            f"Error occurred while downloading source package: {e}")
 
     # Parse the .dsc file to get the source directory
     with open(dsc_path, 'r') as f:
