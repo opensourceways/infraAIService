@@ -396,25 +396,6 @@ def process_src_deb_from_url(url: str):
         raise Exception(
             f"Error occurred while downloading source package: {e}")
 
-    # Parse the .dsc file to get the source directory
-    with open(dsc_path, 'r') as f:
-        dsc_content = f.read()
-
-    import re
-    source_match = re.search(r'^Source:\s*(.*)$', dsc_content,
-                             re.MULTILINE)
-    version_match = re.search(r'^Version:\s*(.*)-.*$', dsc_content,
-                              re.MULTILINE)
-    if not source_match or not version_match:
-        raise Exception("Failed to parse Source or Version from .dsc file")
-    source_name = source_match.group(1)
-    version = version_match.group(1)
-    source_dir = os.path.join(file_save_dir, f"{source_name}-{version}")
-    if not os.path.exists(source_dir):
-        # Try underscore instead of hyphen
-        source_dir = os.path.join(file_save_dir, f"{source_name}_{version}")
-        if not os.path.exists(source_dir):
-            raise Exception(f"Source directory not found: {source_dir}")
     return file_save_dir
 
 
