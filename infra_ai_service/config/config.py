@@ -44,7 +44,7 @@ class Settings(BaseSettings):
     OPENAI_BASE_URL: str = ""
 
     SRC_RPM_DIR: str = "/tmp/infra_ai_service/"
-    SRC_DEB_DIR: str = "/tmp/infra_ai_service_deb/"
+    SRC_DEB_DIR: str = "/mnt/debian/root/"
 
     @property
     def BASE_URL(self) -> str:

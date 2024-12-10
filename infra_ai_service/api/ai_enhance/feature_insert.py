@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 import re
+import shutil
 from fastapi import APIRouter, Body
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
@@ -89,6 +90,8 @@ def dealing_with_deb(request: FeatureInsertRequest):
                          str(ordered_feature))
     logger.info(f"feature_str build finished:{feature_str}")
     create_embedding(feature_str, request.os_version, name)
+    # 删除目录
+    shutil.rmtree(deb_decompress_dir)
     return ordered_feature
 
 
