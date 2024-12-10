@@ -390,7 +390,8 @@ def process_src_deb_from_url(url: str):
         if res.returncode != 0:
             raise Exception(f"dget failed: {res.stderr}")
         print(
-            f"Source package downloaded and extracted successfully to {file_save_dir}")
+            f"Source package downloaded and extracted successfully to "
+            f"{file_save_dir}")
     except Exception as e:
         raise Exception(
             f"Error occurred while downloading source package: {e}")
@@ -400,7 +401,8 @@ def process_src_deb_from_url(url: str):
         dsc_content = f.read()
 
     import re
-    source_match = re.search(r'^Source:\s*(.*)$', dsc_content, re.MULTILINE)
+    source_match = re.search(r'^Source:\s*(.*)$', dsc_content,
+                             re.MULTILINE)
     version_match = re.search(r'^Version:\s*(.*)-.*$', dsc_content,
                               re.MULTILINE)
     if not source_match or not version_match:
