@@ -77,6 +77,8 @@ def dealing_with_deb(request: FeatureInsertRequest):
     feature = extract_dsc_features(
         deb_decompress_dir,
     )
+    # 删除目录
+    shutil.rmtree(deb_decompress_dir)
     logger.info(f"extract deb features finished feature:{feature}")
     name = feature["name"]
     if name != request.package_name:
@@ -90,8 +92,6 @@ def dealing_with_deb(request: FeatureInsertRequest):
                          str(ordered_feature))
     logger.info(f"feature_str build finished:{feature_str}")
     create_embedding(feature_str, request.os_version, name)
-    # 删除目录
-    shutil.rmtree(deb_decompress_dir)
     return ordered_feature
 
 

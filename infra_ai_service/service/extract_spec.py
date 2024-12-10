@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import os
+import shutil
 import subprocess
 import copy
 import urllib.request
@@ -407,6 +408,8 @@ def dealing_with_dsc_content(dir_path: str):
             dsc_file = os.path.join(dir_path, file)
             break
     if not dsc_file:
+        # 删除目录
+        shutil.rmtree(dir_path)
         raise Exception("No .dsc file found in source directory")
 
     # Parse the .dsc file
