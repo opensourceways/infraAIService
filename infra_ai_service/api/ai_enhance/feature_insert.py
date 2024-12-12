@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 import re
+import shutil
 from fastapi import APIRouter, Body
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
@@ -76,6 +77,8 @@ def dealing_with_deb(request: FeatureInsertRequest):
     feature = extract_dsc_features(
         deb_decompress_dir,
     )
+    # 删除目录
+    shutil.rmtree(deb_decompress_dir)
     logger.info(f"extract deb features finished feature:{feature}")
     name = feature["name"]
     if name != request.package_name:

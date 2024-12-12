@@ -17,8 +17,13 @@ RUN yum update -y && \
     make \
     rpmdevtools* \
     wget \
-    dget \
-    && yum clean all
+    && yum clean all \
+    && dnf install -y debootstrap \
+    && mkdir -p /mnt/debian \
+    && debootstrap buster /mnt/debian https://mirrors.huaweicloud.com/debian/ \
+    && echo "chroot /mnt/debian /bin/bash -c 'apt update && apt install -y devscripts'" > /setup_chroot.sh \
+    && chmod +x /setup_chroot.sh \
+    && /setup_chroot.sh
 
 RUN wget https://github.com/BurntSushi/ripgrep/releases/download/14.1.1/ripgrep-14.1.1-x86_64-unknown-linux-musl.tar.gz && \
     tar -zxvf ripgrep-14.1.1-x86_64-unknown-linux-musl.tar.gz && \
